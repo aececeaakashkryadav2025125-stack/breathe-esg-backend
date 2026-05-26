@@ -1,47 +1,62 @@
-# Breathe ESG Backend
+# Breathe ESG Dashboard
 
-Backend system for ESG emissions ingestion built using Django and Django REST Framework.
+A full-stack ESG emissions ingestion dashboard.
 
 ---
 
 ## Features
 
-- CSV upload API
-- SAP ingestion support
-- Utility ingestion support
-- Travel ingestion support
-- Suspicious emissions detection
-- Django admin panel
-- SQLite database
-- REST API architecture
+- Upload CSV files
+- Parse SAP data
+- Parse Utility data
+- Parse Travel data
+- Detect suspicious records
+- Store emissions in SQLite
+- Django REST API
+- React frontend dashboard
 
 ---
 
 ## Tech Stack
 
-- Python
+### Backend
+
 - Django
 - Django REST Framework
-- Pandas
 - SQLite
+- Pandas
+
+### Frontend
+
+- React
+- Vite
+- Axios
 
 ---
 
-## Project Structure
+## Backend Setup
 
-backend/
-│
-├── config/
-├── ingestion/
-├── sample-data/
-├── media/
-├── manage.py
-├── requirements.txt
-└── README.md
+```bash
+cd backend
+python manage.py migrate
+python manage.py runserver
+```
 
 ---
 
-## API Endpoint
+## Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## API Endpoints
+
+### Upload CSV
 
 POST:
 
@@ -49,121 +64,31 @@ POST:
 /api/upload/
 ```
 
-### Form Data
+### Get Records
 
-| Key         | Value Example |
-|------------|---------------|
-| source_type | sap |
-| file | csv file |
-
----
-
-## Supported Sources
-
-### SAP
-
-Expected columns:
-
-- Quantity
-- Unit
-
-### Utility
-
-Expected columns:
-
-- Consumption
-- Unit
-
-### Travel
-
-Dummy ingestion supported.
-
----
-
-## Suspicious Detection Logic
-
-| Source | Condition |
-|--------|-----------|
-| SAP | Quantity > 50000 |
-| Utility | Consumption > 100000 |
-
----
-
-## Run Locally
-
-### 1. Clone repository
-
-```bash
-git clone <repo-url>
-```
-
-### 2. Enter project
-
-```bash
-cd backend
-```
-
-### 3. Create virtual environment
-
-```bash
-python -m venv venv
-```
-
-### 4. Activate environment
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-### 5. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 6. Run migrations
-
-```bash
-python manage.py migrate
-```
-
-### 7. Start server
-
-```bash
-python manage.py runserver
-```
-
----
-
-## Admin Panel
+GET:
 
 ```text
-http://127.0.0.1:8000/admin/
+/api/records/
 ```
 
 ---
 
-## Sample CURL Commands
+## Sample CSV Files
 
-### SAP
+Located in:
 
-```bash
-curl.exe -X POST "http://127.0.0.1:8000/api/upload/" -F "source_type=sap" -F "file=@sample-data/sap.csv"
+```text
+backend/sample-data/
 ```
 
-### Utility
+---
 
-```bash
-curl.exe -X POST "http://127.0.0.1:8000/api/upload/" -F "source_type=utility" -F "file=@sample-data/utility.csv"
-```
+## Suspicious Detection Rules
 
-### Travel
-
-```bash
-curl.exe -X POST "http://127.0.0.1:8000/api/upload/" -F "source_type=travel" -F "file=@sample-data/travel.csv"
-```
+- SAP > 50000
+- Utility > 100000
+- Travel > 5000
 
 ---
 

@@ -2,6 +2,7 @@ from django.db import models
 
 
 class Tenant(models.Model):
+
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -22,7 +23,7 @@ class UploadedFile(models.Model):
     )
 
     source_type = models.CharField(
-        max_length=20,
+        max_length=50,
         choices=SOURCE_CHOICES
     )
 
@@ -40,28 +41,27 @@ class UploadedFile(models.Model):
 
 class EmissionRecord(models.Model):
 
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ]
-
     tenant = models.ForeignKey(
         Tenant,
         on_delete=models.CASCADE
     )
 
     source_type = models.CharField(
-        max_length=20
+        max_length=50
     )
 
     raw_data = models.JSONField()
 
-    normalized_unit = models.CharField(
-        max_length=50
+    original_raw_data = models.JSONField(
+        null=True,
+        blank=True
     )
 
     normalized_value = models.FloatField()
+
+    normalized_unit = models.CharField(
+        max_length=50
+    )
 
     category = models.CharField(
         max_length=100
@@ -71,13 +71,35 @@ class EmissionRecord(models.Model):
         default=False
     )
 
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='pending'
+    approved = models.BooleanField(
+        default=False
     )
 
-    created_at = models.DateTimeField(
+    approved_by = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    edited = models.BooleanField(
+        default=False
+    )
+
+    edited_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    locked_for_audit = models.BooleanField(
+        default=False
+    )
+
+    imported_at = models.DateTimeField(
         auto_now_add=True
     )
 
