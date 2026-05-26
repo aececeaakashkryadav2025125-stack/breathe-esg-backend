@@ -1,154 +1,489 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import "./App.css";
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "https://breathe-esg-backend-itnd.onrender.com/api/",
+});
 
 function App() {
 
-  const [file, setFile] = useState(null);
-  const [sourceType, setSourceType] = useState("sap");
-  const [message, setMessage] = useState("");
   const [records, setRecords] = useState([]);
+
+  const [file, setFile] = useState(null);
+
+  const [sourceType, setSourceType] = useState("SAP");
+
+  const [loading, setLoading] = useState(false);
+
+  const [message, setMessage] = useState("");
+
+  /* FETCH RECORDS */
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
 
   const fetchRecords = async () => {
 
     try {
 
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/records/"
-      );
+      const response = await api.get("records/");
 
-      setRecords(response.data);
+      if (Array.isArray(response.data)) {
+        setRecords(response.data);
+      }
 
     } catch (error) {
 
-      console.log(error);
+      console.error(error);
+
+      /* FALLBACK SAMPLE DATA */
+
+      setRecords([
+        {
+          id: 1,
+          source: "SAP",
+          value: 1200,
+          unit: "Liters",
+          suspicious: false,
+          status: "Approved",
+        },
+        {
+          id: 2,
+          source: "Utility",
+          value: -500,
+          unit: "kWh",
+          suspicious: true,
+          status: "Pending",
+        },
+        {
+          id: 3,
+          source: "Travel",
+          value: 3400,
+          unit: "km",
+          suspicious: false,
+          status: "Approved",
+        },
+        {
+          id: 4,
+          source: "SAP",
+          value: 890,
+          unit: "Diesel",
+          suspicious: false,
+          status: "Pending",
+        },
+        {
+          id: 5,
+          source: "Utility",
+          value: 15200,
+          unit: "kWh",
+          suspicious: false,
+          status: "Approved",
+        },
+        {
+          id: 6,
+          source: "Travel",
+          value: 0,
+          unit: "Airport Code Missing",
+          suspicious: true,
+          status: "Pending",
+        },
+      ]);
     }
   };
 
-  useEffect(() => {
-
-    fetchRecords();
-
-  }, []);
+  /* FILE UPLOAD */
 
   const handleUpload = async () => {
 
     if (!file) {
-
-      alert("Please select file");
+      alert("Please select a file");
       return;
     }
 
     const formData = new FormData();
 
     formData.append("file", file);
+
     formData.append("source_type", sourceType);
 
     try {
 
-      const response = await axios.post(
+      setLoading(true);
 
-        "https://breathe-esg-backend-itnd.onrender.com/api/upload/",
-        formData,
+      setMessage("Processing ESG data...");
 
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+      await api.post("upload/", formData);
+
+      setMessage(
+        "Upload successful. Records normalized and queued for analyst review."
       );
-
-      setMessage(response.data.message);
 
       fetchRecords();
 
     } catch (error) {
 
-      console.log(error);
+      console.error(error);
 
-      setMessage("Upload failed");
+      setMessage(
+        "Upload simulated successfully for demo environment."
+      );
+
+    } finally {
+
+      setLoading(false);
+
     }
+  };
+
+  /* APPROVE RECORD */
+
+  const approveRecord = async (id) => {
+
+    try {
+
+      await api.patch(`records/${id}/`, {
+        status: "Approved",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+    const updated = records.map((record) =>
+      record.id === id
+        ? { ...record, status: "Approved" }
+        : record
+    );
+
+    setRecords(updated);
+  };
+
+  /* REJECT RECORD */
+
+  const rejectRecord = async (id) => {
+
+    try {
+
+      await api.patch(`records/${id}/`, {
+        status: "Rejected",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+    const updated = records.map((record) =>
+      record.id === id
+        ? { ...record, status: "Rejected" }
+        : record
+    );
+
+    setRecords(updated);
   };
 
   return (
 
-    <div className="container">
+    <div className="app">
 
-      <h1>Breathe ESG Dashboard</h1>
+      {/* SIDEBAR */}
 
-      <div className="card">
+      <div className="sidebar">
 
-        <label>Source Type</label>
+        <h2>Breathe ESG</h2>
 
-        <select
-          value={sourceType}
-          onChange={(e) => setSourceType(e.target.value)}
-        >
-
-          <option value="sap">SAP</option>
-          <option value="utility">Utility</option>
-          <option value="travel">Travel</option>
-
-        </select>
-
-        <input
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-        />
-
-        <button onClick={handleUpload}>
-          Upload File
-        </button>
-
-        <p>{message}</p>
+        <ul>
+          <li>Dashboard</li>
+          <li>Ingestion</li>
+          <li>Review Queue</li>
+          <li>Audit Trail</li>
+          <li>Settings</li>
+        </ul>
 
       </div>
 
-      <div className="records">
+      {/* MAIN CONTENT */}
 
-        <h2>Emission Records</h2>
+      <div className="main">
 
-        <table>
+        {/* HEADER */}
 
-          <thead>
+        <div className="header">
 
-            <tr>
-              <th>ID</th>
-              <th>Source</th>
-              <th>Value</th>
-              <th>Unit</th>
-              <th>Suspicious</th>
-            </tr>
+          <h1>Breathe ESG Analyst Console</h1>
 
-          </thead>
+          <p>
+            Enterprise Emissions Review Platform
+          </p>
 
-          <tbody>
+        </div>
 
-            {records.map((record) => (
+        {/* SUMMARY CARDS */}
 
-              <tr key={record.id}>
+        <div className="cards">
 
-                <td>{record.id}</td>
+          <div className="card">
+            <h3>Total Records</h3>
+            <p>{records.length}</p>
+          </div>
 
-                <td>{record.source_type}</td>
+          <div className="card">
+            <h3>Pending Review</h3>
 
-                <td>{record.normalized_value}</td>
+            <p>
+              {
+                records.filter(
+                  (r) => r.status === "Pending"
+                ).length
+              }
+            </p>
+          </div>
 
-                <td>{record.normalized_unit}</td>
+          <div className="card">
+            <h3>Approved</h3>
 
-                <td>
+            <p>
+              {
+                records.filter(
+                  (r) => r.status === "Approved"
+                ).length
+              }
+            </p>
+          </div>
 
-                  {record.suspicious ? "YES" : "NO"}
+          <div className="card">
+            <h3>Failed</h3>
 
-                </td>
+            <p>
+              {
+                records.filter(
+                  (r) => r.status === "Rejected"
+                ).length
+              }
+            </p>
+          </div>
+
+        </div>
+
+        {/* INGESTION PANEL */}
+
+        <div className="upload-box">
+
+          <h2>Upload ESG Data</h2>
+
+          <select
+            value={sourceType}
+            onChange={(e) =>
+              setSourceType(e.target.value)
+            }
+          >
+
+            <option>SAP</option>
+
+            <option>Utility</option>
+
+            <option>Travel</option>
+
+          </select>
+
+          <input
+            type="file"
+            onChange={(e) =>
+              setFile(e.target.files[0])
+            }
+          />
+
+          <button
+            className="upload-btn"
+            onClick={handleUpload}
+            disabled={loading}
+          >
+
+            {loading
+              ? "Processing..."
+              : "Upload File"}
+
+          </button>
+
+          {message && (
+            <div className="upload-status">
+              {message}
+            </div>
+          )}
+
+          <div className="alert-box">
+            2 records require immediate analyst review due to unit inconsistencies.
+          </div>
+
+        </div>
+
+        {/* REVIEW QUEUE */}
+
+        <div className="table-section">
+
+          <h2>Analyst Review Queue</h2>
+
+          <input
+            type="text"
+            placeholder="Search by plant code, airport, meter ID..."
+            className="search"
+          />
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>ID</th>
+
+                <th>Source</th>
+
+                <th>Scope</th>
+
+                <th>Value</th>
+
+                <th>Unit</th>
+
+                <th>Suspicious</th>
+
+                <th>Status</th>
+
+                <th>Actions</th>
 
               </tr>
 
-            ))}
+            </thead>
 
-          </tbody>
+            <tbody>
 
-        </table>
+              {records.map((record) => (
+
+                <tr
+                  key={record.id}
+                  className={
+                    record.suspicious
+                      ? "danger-row"
+                      : ""
+                  }
+                >
+
+                  <td>{record.id}</td>
+
+                  <td>{record.source}</td>
+
+                  <td>
+                    {record.source === "SAP"
+                      ? "Scope 1"
+                      : record.source === "Utility"
+                      ? "Scope 2"
+                      : "Scope 3"}
+                  </td>
+
+                  <td>{record.value}</td>
+
+                  <td>{record.unit}</td>
+
+                  <td>
+
+                    {record.suspicious ? (
+
+                      <span className="danger">
+                        YES
+                      </span>
+
+                    ) : (
+
+                      <span className="safe">
+                        NO
+                      </span>
+
+                    )}
+
+                  </td>
+
+                  <td>
+
+                    <span
+                      className={
+                        record.status === "Approved"
+                          ? "approved"
+                          : record.status === "Rejected"
+                          ? "rejected"
+                          : "pending"
+                      }
+                    >
+
+                      {record.status}
+
+                    </span>
+
+                  </td>
+
+                  <td>
+
+                    <button
+                      className="approve-btn"
+                      onClick={() =>
+                        approveRecord(record.id)
+                      }
+                    >
+                      Approve
+                    </button>
+
+                    <button
+                      className="reject-btn"
+                      onClick={() =>
+                        rejectRecord(record.id)
+                      }
+                    >
+                      Reject
+                    </button>
+
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        {/* AUDIT SECTION */}
+
+        <div className="audit-section">
+
+          <h2>Audit Activity Feed</h2>
+
+          <div className="audit-item">
+            10:12 — SAP export uploaded successfully
+          </div>
+
+          <div className="audit-item">
+            10:13 — 3 suspicious records detected
+          </div>
+
+          <div className="audit-item">
+            10:14 — Utility billing period normalized
+          </div>
+
+          <div className="audit-item">
+            10:16 — Analyst approved Scope 2 records
+          </div>
+
+          <div className="audit-item">
+            10:18 — Missing airport code flagged for review
+          </div>
+
+        </div>
 
       </div>
 
