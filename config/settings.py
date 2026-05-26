@@ -10,23 +10,21 @@ import os
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Security
+SECRET_KEY = 'django-insecure-8vp0@#5l=q)0lpe#x-dnm0ib^27^q92bpqt3^qp(wt9!mem1a7'
 
-# SECURITY WARNING
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-8vp0@#5l=q)0lpe#x-dnm0ib^27^q92bpqt3^qp(wt9!mem1a7"
-)
+# IMPORTANT FOR PRODUCTION
+DEBUG = False
 
-DEBUG = True
-
-
-# IMPORTANT FOR RENDER DEPLOYMENT
+# Render domain
 ALLOWED_HOSTS = [
-    "*"
+    '127.0.0.1',
+    'localhost',
+    'breathe-esg-backend-itnd.onrender.com'
 ]
 
 
-# INSTALLED APPS
+# Installed apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,28 +35,24 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
-
     'ingestion',
 ]
 
 
-# MIDDLEWARE
+# Middleware
 MIDDLEWARE = [
-
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
 
+    # IMPORTANT FOR STATIC FILES
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
-
     'django.middleware.common.CommonMiddleware',
-
     'django.middleware.csrf.CsrfViewMiddleware',
-
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-
     'django.contrib.messages.middleware.MessageMiddleware',
-
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -66,21 +60,16 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'config.urls'
 
 
-# TEMPLATES
+# Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-
         'DIRS': [],
-
         'APP_DIRS': True,
-
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
-
                 'django.contrib.auth.context_processors.auth',
-
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -91,37 +80,33 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# DATABASE
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 
-# PASSWORD VALIDATION
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
-
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
-
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
-
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
 
-# INTERNATIONALIZATION
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -131,15 +116,17 @@ USE_I18N = True
 USE_TZ = True
 
 
-# STATIC FILES
-STATIC_URL = 'static/'
+# Static files
+
+STATIC_URL = '/static/'
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# MEDIA FILES
+
+# Media files
 MEDIA_URL = '/media/'
-
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
@@ -147,5 +134,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-# DEFAULT PRIMARY KEY
+# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
