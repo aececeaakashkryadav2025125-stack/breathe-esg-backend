@@ -69,8 +69,6 @@ function App() {
 
   const [message, setMessage] = useState("");
 
-  /* FETCH RECORDS */
-
   useEffect(() => {
     fetchRecords();
   }, []);
@@ -80,6 +78,8 @@ function App() {
     try {
 
       const response = await api.get("records/");
+
+      console.log("API Response:", response.data);
 
       if (
         Array.isArray(response.data) &&
@@ -102,8 +102,6 @@ function App() {
 
     }
   };
-
-  /* FILE UPLOAD */
 
   const handleUpload = async () => {
 
@@ -147,21 +145,7 @@ function App() {
     }
   };
 
-  /* APPROVE */
-
-  const approveRecord = async (id) => {
-
-    try {
-
-      await api.patch(`records/${id}/`, {
-        status: "Approved",
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
+  const approveRecord = (id) => {
 
     const updated = records.map((record) =>
       record.id === id
@@ -172,21 +156,7 @@ function App() {
     setRecords(updated);
   };
 
-  /* REJECT */
-
-  const rejectRecord = async (id) => {
-
-    try {
-
-      await api.patch(`records/${id}/`, {
-        status: "Rejected",
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
+  const rejectRecord = (id) => {
 
     const updated = records.map((record) =>
       record.id === id
@@ -233,7 +203,7 @@ function App() {
 
         </div>
 
-        {/* CARDS */}
+        {/* DASHBOARD CARDS */}
 
         <div className="cards">
 
@@ -332,7 +302,7 @@ function App() {
 
         </div>
 
-        {/* TABLE */}
+        {/* REVIEW QUEUE */}
 
         <div className="table-section">
 
@@ -469,7 +439,7 @@ function App() {
 
         </div>
 
-        {/* AUDIT */}
+        {/* AUDIT FEED */}
 
         <div className="audit-section">
 
