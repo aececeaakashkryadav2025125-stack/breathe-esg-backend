@@ -6,9 +6,12 @@ from django.http import JsonResponse
 def home(request):
     return JsonResponse({
         "message": "Breathe ESG Backend Running",
-        "admin": "/admin/",
-        "api_records": "/api/records/",
-        "api_upload": "/api/upload/"
+        "status": "success",
+        "routes": {
+            "admin": "/admin/",
+            "records": "/api/records/",
+            "upload": "/api/upload/"
+        }
     })
 
 
