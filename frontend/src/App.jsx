@@ -8,7 +8,58 @@ const api = axios.create({
 
 function App() {
 
-  const [records, setRecords] = useState([]);
+  const fallbackRecords = [
+    {
+      id: 1,
+      source: "SAP",
+      value: 1200,
+      unit: "Liters",
+      suspicious: false,
+      status: "Approved",
+    },
+    {
+      id: 2,
+      source: "Utility",
+      value: -500,
+      unit: "kWh",
+      suspicious: true,
+      status: "Pending",
+    },
+    {
+      id: 3,
+      source: "Travel",
+      value: 3400,
+      unit: "km",
+      suspicious: false,
+      status: "Approved",
+    },
+    {
+      id: 4,
+      source: "SAP",
+      value: 890,
+      unit: "Diesel",
+      suspicious: false,
+      status: "Pending",
+    },
+    {
+      id: 5,
+      source: "Utility",
+      value: 15200,
+      unit: "kWh",
+      suspicious: false,
+      status: "Approved",
+    },
+    {
+      id: 6,
+      source: "Travel",
+      value: 0,
+      unit: "Airport Code Missing",
+      suspicious: true,
+      status: "Pending",
+    },
+  ];
+
+  const [records, setRecords] = useState(fallbackRecords);
 
   const [file, setFile] = useState(null);
 
@@ -30,66 +81,25 @@ function App() {
 
       const response = await api.get("records/");
 
-      if (Array.isArray(response.data)) {
+      if (
+        Array.isArray(response.data) &&
+        response.data.length > 0
+      ) {
+
         setRecords(response.data);
+
+      } else {
+
+        setRecords(fallbackRecords);
+
       }
 
     } catch (error) {
 
       console.error(error);
 
-      /* FALLBACK SAMPLE DATA */
+      setRecords(fallbackRecords);
 
-      setRecords([
-        {
-          id: 1,
-          source: "SAP",
-          value: 1200,
-          unit: "Liters",
-          suspicious: false,
-          status: "Approved",
-        },
-        {
-          id: 2,
-          source: "Utility",
-          value: -500,
-          unit: "kWh",
-          suspicious: true,
-          status: "Pending",
-        },
-        {
-          id: 3,
-          source: "Travel",
-          value: 3400,
-          unit: "km",
-          suspicious: false,
-          status: "Approved",
-        },
-        {
-          id: 4,
-          source: "SAP",
-          value: 890,
-          unit: "Diesel",
-          suspicious: false,
-          status: "Pending",
-        },
-        {
-          id: 5,
-          source: "Utility",
-          value: 15200,
-          unit: "kWh",
-          suspicious: false,
-          status: "Approved",
-        },
-        {
-          id: 6,
-          source: "Travel",
-          value: 0,
-          unit: "Airport Code Missing",
-          suspicious: true,
-          status: "Pending",
-        },
-      ]);
     }
   };
 
@@ -137,7 +147,7 @@ function App() {
     }
   };
 
-  /* APPROVE RECORD */
+  /* APPROVE */
 
   const approveRecord = async (id) => {
 
@@ -162,7 +172,7 @@ function App() {
     setRecords(updated);
   };
 
-  /* REJECT RECORD */
+  /* REJECT */
 
   const rejectRecord = async (id) => {
 
@@ -207,7 +217,7 @@ function App() {
 
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN */}
 
       <div className="main">
 
@@ -223,7 +233,7 @@ function App() {
 
         </div>
 
-        {/* SUMMARY CARDS */}
+        {/* CARDS */}
 
         <div className="cards">
 
@@ -270,7 +280,7 @@ function App() {
 
         </div>
 
-        {/* INGESTION PANEL */}
+        {/* UPLOAD */}
 
         <div className="upload-box">
 
@@ -322,7 +332,7 @@ function App() {
 
         </div>
 
-        {/* REVIEW QUEUE */}
+        {/* TABLE */}
 
         <div className="table-section">
 
@@ -378,11 +388,13 @@ function App() {
                   <td>{record.source}</td>
 
                   <td>
+
                     {record.source === "SAP"
                       ? "Scope 1"
                       : record.source === "Utility"
                       ? "Scope 2"
                       : "Scope 3"}
+
                   </td>
 
                   <td>{record.value}</td>
@@ -457,7 +469,7 @@ function App() {
 
         </div>
 
-        {/* AUDIT SECTION */}
+        {/* AUDIT */}
 
         <div className="audit-section">
 
