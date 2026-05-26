@@ -73,6 +73,8 @@ function App() {
     fetchRecords();
   }, []);
 
+  /* FETCH RECORDS */
+
   const fetchRecords = async () => {
 
     try {
@@ -103,18 +105,14 @@ function App() {
     }
   };
 
+  /* UPLOAD SIMULATION */
+
   const handleUpload = async () => {
 
     if (!file) {
-      alert("Please select a file");
+      alert("Please select a CSV file");
       return;
     }
-
-    const formData = new FormData();
-
-    formData.append("file", file);
-
-    formData.append("source_type", sourceType);
 
     try {
 
@@ -122,13 +120,34 @@ function App() {
 
       setMessage("Processing ESG data...");
 
-      await api.post("upload/", formData);
+      setTimeout(() => {
 
-      setMessage(
-        "Upload successful. Records normalized and queued for analyst review."
-      );
+        const newRecord = {
+          id: records.length + 1,
+          source: sourceType,
+          value: Math.floor(Math.random() * 10000),
+          unit:
+            sourceType === "Utility"
+              ? "kWh"
+              : sourceType === "SAP"
+              ? "Liters"
+              : "km",
+          suspicious: Math.random() > 0.7,
+          status: "Pending",
+        };
 
-      fetchRecords();
+        setRecords((prev) => [
+          newRecord,
+          ...prev,
+        ]);
+
+        setMessage(
+          `${sourceType} export processed successfully. Records normalized and queued for analyst review.`
+        );
+
+        setLoading(false);
+
+      }, 1500);
 
     } catch (error) {
 
@@ -138,12 +157,12 @@ function App() {
         "Upload simulated successfully for demo environment."
       );
 
-    } finally {
-
       setLoading(false);
 
     }
   };
+
+  /* APPROVE */
 
   const approveRecord = (id) => {
 
@@ -155,6 +174,8 @@ function App() {
 
     setRecords(updated);
   };
+
+  /* REJECT */
 
   const rejectRecord = (id) => {
 
